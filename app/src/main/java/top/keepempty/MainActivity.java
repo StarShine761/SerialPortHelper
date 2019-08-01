@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private String[] entryValues;
     private boolean isOpen;
     private StringBuilder receiveTxt = new StringBuilder();
+    private  String receiveData = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mSerialPortFinder = new SerialPortFinder();
         entryValues = mSerialPortFinder.getAllDevicesPath();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-              this, android.R.layout.simple_spinner_item,
-               entryValues);
+                this, android.R.layout.simple_spinner_item,
+                entryValues);
         mPathSpinner.setAdapter(adapter);
 
         mSendBtn = findViewById(R.id.sph_sendBtn);
@@ -93,12 +94,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(View v) {
                 String sendTxt = mSendDataEt.getText().toString().trim();
-                if(TextUtils.isEmpty(sendTxt)){
-                    Toast.makeText(MainActivity.this,"请输入发送命令！",Toast.LENGTH_LONG).show();
+                if (TextUtils.isEmpty(sendTxt)) {
+                    Toast.makeText(MainActivity.this, "请输入发送命令！", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (sendTxt.length() % 2 == 1) {
-                    Toast.makeText(MainActivity.this,"命令错误！",Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "命令错误！", Toast.LENGTH_LONG).show();
                     return;
                 }
                 serialPortHelper.addCommands(sendTxt);
@@ -108,10 +109,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mOpenBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isOpen){
+                if (isOpen) {
                     serialPortHelper.closeDevice();
                     isOpen = false;
-                }else{
+                } else {
                     openSerialPort();
                 }
                 showState();
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     /**
      * 打开串口
      */
-    private void openSerialPort(){
+    private void openSerialPort() {
 
         /**
          * 串口参数
@@ -132,35 +133,39 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         serialPortConfig.path = path;
         serialPortConfig.baudRate = baudRate;
         serialPortConfig.dataBits = dataBits;
-        serialPortConfig.parity   = checkBits;
+        serialPortConfig.parity = checkBits;
         serialPortConfig.stopBits = stopBits;
 
 
         // 初始化串口
-        serialPortHelper = new SerialPortHelper(16);
+        serialPortHelper = new SerialPortHelper(64);
         // 设置串口参数
         serialPortHelper.setConfigInfo(serialPortConfig);
         // 开启串口
         isOpen = serialPortHelper.openDevice();
-        if(!isOpen){
-            Toast.makeText(this,"串口打开失败！",Toast.LENGTH_LONG).show();
+        if (!isOpen) {
+            Toast.makeText(this, "串口打开失败！", Toast.LENGTH_LONG).show();
         }
         serialPortHelper.setSphResultCallback(new SphResultCallback() {
             @Override
             public void onSendData(SphCmdEntity sendCom) {
                 Log.d(TAG, "发送命令：" + sendCom.commandsHex);
+                receiveData="";
             }
 
             @Override
             public void onReceiveData(SphCmdEntity data) {
                 Log.d(TAG, "收到命令：" + data.commandsHex);
-                receiveTxt.append(data.commandsHex).append("\n");
-                mShowReceiveTxt.setText(receiveTxt.toString());
+                receiveData = receiveData + data.commandsHex;
+                //                receiveTxt.append(data.commandsHex).append("\n");
+//                mShowReceiveTxt.setText(receiveTxt.toString());
             }
 
             @Override
             public void onComplete() {
                 Log.d(TAG, "完成");
+                mShowReceiveTxt.setText("\n"+receiveData);
+
             }
         });
     }
@@ -197,15 +202,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     }
 
-    private void showState(){
-        if(isOpen){
-            Toast.makeText(this,"串口打开成功！",Toast.LENGTH_LONG).show();
+    private void showState() {
+        if (isOpen) {
+            Toast.makeText(this, "串口打开成功！", Toast.LENGTH_LONG).show();
             mOpenBtn.setText("关闭串口");
-            mOpenBtn.setTextColor(ContextCompat.getColor(this,R.color.org));
+            mOpenBtn.setTextColor(ContextCompat.getColor(this, R.color.org));
             mOpenBtn.setBackgroundResource(R.drawable.button_style_stroke);
-        }else {
+        } else {
             mOpenBtn.setText("打开串口");
-            mOpenBtn.setTextColor(ContextCompat.getColor(this,R.color.white));
+            mOpenBtn.setTextColor(ContextCompat.getColor(this, R.color.white));
             mOpenBtn.setBackgroundResource(R.drawable.button_style_org);
         }
     }
