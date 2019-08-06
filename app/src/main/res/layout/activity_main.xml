@@ -4,6 +4,7 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal"
     android:focusableInTouchMode="true"
+    android:fitsSystemWindows="true"
     android:focusable="true">
 
 
@@ -230,6 +231,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/button_style_stroke"
+            android:paddingBottom="0dp"
             android:lines="2" />
 
         <Button
