@@ -40,7 +40,7 @@ public class SerHelper {
         int i = SerialPortJNI.openPort("dev/ttyUSB0", 19200, 8, 1, 'E');
 
         if (i == 1) {
-            Log.d(TAG, "打开成功---" );
+            Log.d(TAG, "打开成功---");
 
             mIsOpen = true;
             getSerialPort();
@@ -76,6 +76,19 @@ public class SerHelper {
     }
 
 
+    public void close() {
+        try {
+            SerialPortJNI.closePort();
+            mIsOpen = false;
+            receiveData = "";
+            mReceiveThread.interrupt();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
     private void getSerialPort() {
         if (mReceiveThread == null) {
 
@@ -107,7 +120,7 @@ public class SerHelper {
                     byte[] bytes = SerialPortJNI.readPort(1024);
 
                     if (bytes != null) {
-                        String readString = DataUtils.ByteArrToHex(bytes,0,bytes.length);
+                        String readString = DataUtils.ByteArrToHex(bytes, 0, bytes.length);
                         receiveData = receiveData + readString.trim();
                         if (receiveData.length() >= 22) {
                             Log.d(TAG, "receiveData---" + receiveData);
